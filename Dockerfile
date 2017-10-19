@@ -12,6 +12,8 @@ ENV RUBY_VERSION 2.1.10
 ENV RUBY_DOWNLOAD_SHA256 5be9f8d5d29d252cd7f969ab7550e31bbb001feb4a83532301c0dd3b5006e148
 ENV RUBYGEMS_VERSION 2.6.8
 
+RUN apt-get install -y zlib1g-dev
+
 # some of ruby's build scripts are written in ruby
 #   we purge system ruby later to make sure our final image uses what we just built
 RUN set -ex \
@@ -22,7 +24,6 @@ RUN set -ex \
 		libgdbm-dev \
 		ruby \
 		autoconf \
-		zlib1g-dev \
 		libssl-dev \
 	' \
 	&& apt-get update \
