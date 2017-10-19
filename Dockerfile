@@ -21,6 +21,9 @@ RUN set -ex \
 		dpkg-dev \
 		libgdbm-dev \
 		ruby \
+		autoconf \
+		zlib1g-dev \
+		libssl-dev \
 	' \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends $buildDeps \
@@ -45,7 +48,7 @@ RUN set -ex \
 	&& mv file.c.new file.c \
 	\
 	&& autoconf \
-	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
+	&& gnuArch="$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)" \
 	&& ./configure \
 		--build="$gnuArch" \
 		--disable-install-doc \
