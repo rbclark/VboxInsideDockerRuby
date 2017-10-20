@@ -11,6 +11,8 @@ ENV RUBY_MAJOR 2.1
 ENV RUBY_VERSION 2.1.10
 ENV RUBY_DOWNLOAD_SHA256 5be9f8d5d29d252cd7f969ab7550e31bbb001feb4a83532301c0dd3b5006e148
 ENV RUBYGEMS_VERSION 2.6.8
+ENV VAGRANT_VERSION 2.0.0
+ENV VAGRANT_DOWNLOAD_SHA256 bd54383e8ca2f7d00e06c9afa8bf7221b26abfe89e9ae950c69de2ee97af8aa0
 
 RUN apt-get install -y zlib1g-dev
 
@@ -77,5 +79,10 @@ ENV BUNDLE_PATH="$GEM_HOME" \
 ENV PATH $BUNDLE_BIN:$PATH
 RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
+
+RUN set -ex \
+	&& wget -O vagrant.deb "https://releases.hashicorp.com/vagrant/$VAGRANT_VERSION/vagrant_${VAGRANT_VERSION}_x86_64.deb" \
+	&& echo "$VAGRANT_DOWNLOAD_SHA256 *vagrant.deb" | sha256sum -c - \
+	&& dpkg -i vagrant.deb
 
 CMD [ "irb" ]
