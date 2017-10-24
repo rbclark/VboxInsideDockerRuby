@@ -2,17 +2,17 @@ FROM blacklabelops/virtualbox:latest
 
 # skip installing gem documentation
 RUN mkdir -p /usr/local/etc \
-	&& { \
-		echo 'install: --no-document'; \
-		echo 'update: --no-document'; \
-	} >> /usr/local/etc/gemrc
+  && { \
+    echo 'install: --no-document'; \
+    echo 'update: --no-document'; \
+  } >> /usr/local/etc/gemrc
 
 RUN yum install -y openssl-devel readline-devel zlib-devel
 
 RUN git clone git://github.com/rbenv/rbenv.git /usr/local/rbenv \
-		&&  git clone git://github.com/rbenv/ruby-build.git /usr/local/rbenv/plugins/ruby-build \
-		&&  git clone git://github.com/jf/rbenv-gemset.git /usr/local/rbenv/plugins/rbenv-gemset \
-		&&  /usr/local/rbenv/plugins/ruby-build/install.sh
+    &&  git clone git://github.com/rbenv/ruby-build.git /usr/local/rbenv/plugins/ruby-build \
+    &&  git clone git://github.com/jf/rbenv-gemset.git /usr/local/rbenv/plugins/rbenv-gemset \
+    &&  /usr/local/rbenv/plugins/ruby-build/install.sh
 ENV PATH /usr/local/rbenv/bin:$PATH
 ENV RBENV_ROOT /usr/local/rbenv
 
@@ -32,4 +32,8 @@ RUN eval "$(rbenv init -)"; rbenv install 2.1.10 \
 &&  eval "$(rbenv init -)"; gem update --system \
 &&  eval "$(rbenv init -)"; gem install bundler
 
-CMD [ "irb" ]
+RUN yum remove -y vagrant
+
+RUN export VAGRANT_VERSION=2.0.0 && \
+    wget --directory-prefix=/tmp https://releases.hashicorp.com/vagrant/${VAGRANT_VERSION}/vagrant_${VAGRANT_VERSION}_x86_64.rpm && \
+    rpm -i /tmp/vagrant_${VAGRANT_VERSION}_x86_64.rpm
