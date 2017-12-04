@@ -2,6 +2,7 @@ FROM centos:7 as builder
 
 ENV RUBY_VERSION 2.1.10
 ENV CONFIGURE_OPTS --disable-install-doc
+ENV RBENV_ROOT /usr/local/rbenv
 ENV PATH /usr/local/rbenv/bin:/usr/local/rbenv/shims:$PATH
 
 # skip installing gem documentation
@@ -29,14 +30,6 @@ RUN git clone git://github.com/rbenv/rbenv.git /usr/local/rbenv \
     &&  git clone git://github.com/jf/rbenv-gemset.git /usr/local/rbenv/plugins/rbenv-gemset \
     &&  /usr/local/rbenv/plugins/ruby-build/install.sh
 
-RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /etc/profile.d/rbenv.sh \
-&&  echo 'export PATH=/usr/local/rbenv/bin:$PATH' >> /etc/profile.d/rbenv.sh \
-&&  echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
-
-RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /root/.bashrc \
-&&  echo 'export PATH=/usr/local/rbenv/bin:$PATH' >> /root/.bashrc \
-&&  echo 'eval "$(rbenv init -)"' >> /root/.bashrc
-
 RUN eval "$(rbenv init -)"; rbenv install $RUBY_VERSION \
 &&  eval "$(rbenv init -)"; rbenv global $RUBY_VERSION \
 &&  eval "$(rbenv init -)"; gem update --system \
@@ -56,8 +49,7 @@ RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /etc/profile.d/rbenv.sh \
 
 RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /root/.bashrc \
 &&  echo 'export PATH=/usr/local/rbenv/bin:$PATH' >> /root/.bashrc \
-&&  echo 'eval "$(rbenv init -)"' >> /root/.bashrc \
-&&  eval "$(rbenv init -)"; rbenv rehash
+&&  echo 'eval "$(rbenv init -)"' >> /root/.bashrc
 
 RUN cd /tmp && \
     curl -o vagrant.rpm https://releases.hashicorp.com/vagrant/${VAGRANT_VERSION}/vagrant_${VAGRANT_VERSION}_x86_64.rpm && \
