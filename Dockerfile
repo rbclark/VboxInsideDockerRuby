@@ -1,4 +1,6 @@
-FROM blacklabelops/virtualbox:latest
+FROM centos:7 as builder
+
+ENV RUBY_VERSION 2.1.10
 
 # skip installing gem documentation
 RUN mkdir -p /usr/local/etc \
@@ -7,7 +9,19 @@ RUN mkdir -p /usr/local/etc \
     echo 'update: --no-document'; \
   } >> /usr/local/etc/gemrc
 
-RUN yum install -y openssl-devel readline-devel zlib-devel
+# install dev tools
+RUN yum install -y \
+      unzip \
+      tar \
+      gzip \
+      wget \
+      openssl-devel \
+      readline-devel \
+      zlib-devel \
+      git \
+      bzip2 \
+      gcc \
+      make
 
 RUN git clone git://github.com/rbenv/rbenv.git /usr/local/rbenv \
     &&  git clone git://github.com/rbenv/ruby-build.git /usr/local/rbenv/plugins/ruby-build \
@@ -27,13 +41,40 @@ RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /root/.bashrc \
 ENV CONFIGURE_OPTS --disable-install-doc
 ENV PATH /usr/local/rbenv/bin:/usr/local/rbenv/shims:$PATH
 
-RUN eval "$(rbenv init -)"; rbenv install 2.1.10 \
-&&  eval "$(rbenv init -)"; rbenv global 2.1.10 \
+RUN eval "$(rbenv init -)"; rbenv install $RUBY_VERSION \
+&&  eval "$(rbenv init -)"; rbenv global $RUBY_VERSION \
 &&  eval "$(rbenv init -)"; gem update --system \
-&&  eval "$(rbenv init -)"; gem install bundler
+&&  eval "$(rbenv init -)"; gem install -f bundler
 
-RUN yum remove -y vagrant
+FROM centos:7
 
-RUN export VAGRANT_VERSION=2.0.0 && \
-    wget --directory-prefix=/tmp https://releases.hashicorp.com/vagrant/${VAGRANT_VERSION}/vagrant_${VAGRANT_VERSION}_x86_64.rpm && \
-    rpm -i /tmp/vagrant_${VAGRANT_VERSION}_x86_64.rpm
+ENV VAGRANT_VERSION 2.0.1
+ENV VIRTUALBOX_VERSION latest
+
+COPY --from=builder /usr/local/rbenv /usr/local/rbenv
+
+RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /etc/profile.d/rbenv.sh \
+&&  echo 'export PATH=/usr/local/rbenv/bin:$PATH' >> /etc/profile.d/rbenv.sh \
+&&  echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
+
+RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /root/.bashrc \
+&&  echo 'export PATH=/usr/local/rbenv/bin:$PATH' >> /root/.bashrc \
+&&  echo 'eval "$(rbenv init -)"' >> /root/.bashrc
+
+RUN cd /tmp && \
+    curl -o vagrant.rpm https://releases.hashicorp.com/vagrant/${VAGRANT_VERSION}/vagrant_${VAGRANT_VERSION}_x86_64.rpm && \
+    rpm -i /tmp/vagrant.rpm
+
+# install Virtualbox (Example version: 5.0.14_105127_el7-1)
+RUN mkdir -p /opt/virtualbox && \
+    cd /etc/yum.repos.d/ && \
+    curl -o virtualbox.repo http://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo && \
+    yum install -y \
+      dkms \
+      kernel-devel && \
+    yum -y groupinstall "Development Tools" && \
+    if  [ "${VIRTUALBOX_VERSION}" = "latest" ]; \
+      then yum install -y VirtualBox-5.0 ; \
+      else yum install -y VirtualBox-5.0-${VIRTUALBOX_VERSION} ; \
+    fi && \
+    yum clean all && rm -rf /var/cache/yum/* && rm -rf /tmp/*
