@@ -14,7 +14,6 @@ RUN yum install -y \
       unzip \
       tar \
       gzip \
-      wget \
       openssl-devel \
       readline-devel \
       zlib-devel \
