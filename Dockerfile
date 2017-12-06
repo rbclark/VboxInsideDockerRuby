@@ -61,6 +61,7 @@ RUN mkdir -p /opt/virtualbox && \
     curl -o virtualbox.repo http://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo && \
     yum install -y \
       dkms \
+      zlib-devel \
       kernel-devel && \
     yum -y groupinstall "Development Tools" && \
     if  [ "${VIRTUALBOX_VERSION}" = "latest" ]; \
