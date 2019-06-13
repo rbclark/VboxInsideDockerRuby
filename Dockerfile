@@ -1,6 +1,6 @@
 FROM centos:7 as builder
 
-ENV RUBY_VERSION 2.1.10
+ENV RUBY_VERSION 2.5.5
 ENV CONFIGURE_OPTS --disable-install-doc
 ENV RBENV_ROOT /usr/local/rbenv
 ENV PATH /usr/local/rbenv/bin:/usr/local/rbenv/shims:$PATH
@@ -37,7 +37,7 @@ RUN eval "$(rbenv init -)"; rbenv install $RUBY_VERSION \
 
 FROM centos:7
 
-ENV VAGRANT_VERSION 2.0.1
+ENV VAGRANT_VERSION 2.2.4
 ENV VIRTUALBOX_VERSION latest
 ENV PATH /usr/local/rbenv/bin:/usr/local/rbenv/shims:$PATH
 
@@ -65,7 +65,7 @@ RUN mkdir -p /opt/virtualbox && \
       kernel-devel && \
     yum -y groupinstall "Development Tools" && \
     if  [ "${VIRTUALBOX_VERSION}" = "latest" ]; \
-      then yum install -y VirtualBox-5.0 ; \
-      else yum install -y VirtualBox-5.0-${VIRTUALBOX_VERSION} ; \
+      then yum install -y VirtualBox-6.0 ; \
+      else yum install -y VirtualBox-6.0-${VIRTUALBOX_VERSION} ; \
     fi && \
     yum clean all && rm -rf /var/cache/yum/* && rm -rf /tmp/*
