@@ -37,7 +37,7 @@ RUN eval "$(rbenv init -)"; rbenv install $RUBY_VERSION \
 
 FROM centos:7
 
-ENV VAGRANT_VERSION 2.2.4
+ENV VAGRANT_VERSION 2.2.3
 ENV VIRTUALBOX_VERSION latest
 ENV PATH /usr/local/rbenv/bin:/usr/local/rbenv/shims:$PATH
 
